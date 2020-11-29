@@ -1,9 +1,18 @@
 import logo from './logo.svg';
 import './App.css';
+import React from "react";
+
+
+//import EchartsTest from './components/echartTest'
+import BarChart from './components/barChart'
+//import dynamicChart from './components/dynamicChart'
+import Dynamic from "./components/Dynamic";
 
 function App() {
   return (
     <div className="App">
+      <BarChart/>
+      <Dynamic/>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
