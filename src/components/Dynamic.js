@@ -17,13 +17,18 @@ class Dynamic extends Component{
     }
     timeTicket = null;
     count = 51;
-    getInitialState = () => ({option: this.getOption()});
+    curHumidity = -1;
+    getInitialState = () => ({option: this.getOption(), curTemperature: -1});
 
-    request = () => {
-        axios.get('/greeting')
+    getTemperature = () => {
+        const _this = this;
+        axios.get('/getTemperature')
             .then(function (response){
                 // handle success
-                console.log(response);
+                //console.log(response);
+                var data = response.data.data;
+                console.log("data:" + data);
+                _this.setState({curTemperature: data / 10})
             })
             .catch(function (error) {
                 // handle error
@@ -41,12 +46,13 @@ class Dynamic extends Component{
         let data0 = option.series[0].data;
         let data1 = option.series[1].data;
         data0.shift();
-        // 预购数量
+        // 预购数量 （ ）
         data0.push(300);
+
         data1.shift();
-        // 价格
-        data1.push(10);
-        this.request();
+        // 价格（temperature）
+        this.getTemperature();
+        data1.push(this.state.curTemperature);
 
         option.xAxis[0].data.shift();
         option.xAxis[0].data.push(axisData);
@@ -78,7 +84,7 @@ class Dynamic extends Component{
             trigger: 'axis'
         },
         legend: {
-            data:['最新成交价', '预购队列']
+            data:['temperature', '预购队列']
         },
         toolbox: {
             show: true,
@@ -139,8 +145,8 @@ class Dynamic extends Component{
             {
                 type: 'value',
                 scale: true,
-                name: '价格',
-                max: 20,
+                name: 'temperature',
+                max: 50,
                 min: 0,
                 boundaryGap: [0.2, 0.2]
             },
@@ -181,7 +187,7 @@ class Dynamic extends Component{
                 })()
             },
             {
-                name:'最新成交价',
+                name:'temperature',
                 type:'line',
                 data:(function (){
                     let res = [];
