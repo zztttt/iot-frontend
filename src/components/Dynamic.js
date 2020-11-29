@@ -1,9 +1,14 @@
 import React, { Component } from 'react';
-import cloneDeep from 'lodash.clonedeep';
-//import echarts from 'echarts/lib/echarts';
 import ReactEcharts from 'echarts-for-react';
+import cloneDeep from 'lodash.clonedeep';
 
 import '../App.css'
+
+const axios = require('axios');
+axios.defaults.baseURL = 'http://localhost:8080';
+//axios.defaults.headers.common['Authorization'] = 'AUTH_TOKEN';
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+
 
 class Dynamic extends Component{
     constructor(props) {
@@ -13,6 +18,21 @@ class Dynamic extends Component{
     timeTicket = null;
     count = 51;
     getInitialState = () => ({option: this.getOption()});
+
+    request = () => {
+        axios.get('/greeting')
+            .then(function (response){
+                // handle success
+                console.log(response);
+            })
+            .catch(function (error) {
+                // handle error
+                console.log(error);
+            })
+            .then(function () {
+                // always executed
+            });
+    }
 
     fetchNewDate = () => {
         let axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
@@ -26,6 +46,7 @@ class Dynamic extends Component{
         data1.shift();
         // 价格
         data1.push(10);
+        this.request();
 
         option.xAxis[0].data.shift();
         option.xAxis[0].data.push(axisData);
