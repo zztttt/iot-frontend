@@ -46,7 +46,7 @@ class Dynamic extends Component{
         let data0 = option.series[0].data;
         let data1 = option.series[1].data;
         data0.shift();
-        // 预购数量 （ ）
+        // 预购数量 (humidity)
         data0.push(300);
 
         data1.shift();
@@ -67,7 +67,7 @@ class Dynamic extends Component{
         if (this.timeTicket) {
             clearInterval(this.timeTicket);
         }
-        this.timeTicket = setInterval(this.fetchNewDate, 1000);
+        this.timeTicket = setInterval(this.fetchNewDate, 5000);
     };
 
     componentWillUnmount() {
