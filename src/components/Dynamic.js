@@ -9,6 +9,10 @@ axios.defaults.baseURL = 'http://localhost:8080';
 //axios.defaults.headers.common['Authorization'] = 'AUTH_TOKEN';
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
+const humidityLow = 20;
+const humidityHigh = 70;
+const temperatureLow = -10;
+const temperatureHigh = 30;
 
 class Dynamic extends Component{
     constructor(props) {
@@ -17,18 +21,17 @@ class Dynamic extends Component{
     }
     timeTicket = null;
     count = 51;
-    curHumidity = -1;
-    getInitialState = () => ({option: this.getOption(), curTemperature: -1});
+    getInitialState = () => ({option: this.getOption(), curTemperature: temperatureLow, curHumidity: humidityLow});
 
     getTemperature = () => {
         const _this = this;
-        axios.get('/getTemperature')
+        axios.get('/getData')
             .then(function (response){
                 // handle success
-                //console.log(response);
-                var data = response.data.data;
-                console.log("data:" + data);
-                _this.setState({curTemperature: data / 10})
+                console.log(response);
+                //var data = response.data;
+                var json = response.data;
+                _this.setState({curTemperature: json["temperature"], curHumidity: json["humidity"]});
             })
             .catch(function (error) {
                 // handle error
@@ -47,7 +50,7 @@ class Dynamic extends Component{
         let data1 = option.series[1].data;
         data0.shift();
         // 预购数量 (humidity)
-        data0.push(300);
+        data0.push(this.state.curHumidity);
 
         data1.shift();
         // 价格（temperature）
@@ -67,7 +70,7 @@ class Dynamic extends Component{
         if (this.timeTicket) {
             clearInterval(this.timeTicket);
         }
-        this.timeTicket = setInterval(this.fetchNewDate, 5000);
+        this.timeTicket = setInterval(this.fetchNewDate, 10000);
     };
 
     componentWillUnmount() {
@@ -84,7 +87,7 @@ class Dynamic extends Component{
             trigger: 'axis'
         },
         legend: {
-            data:['temperature', '预购队列']
+            data:['temperature', 'humidity']
         },
         toolbox: {
             show: true,
@@ -107,8 +110,8 @@ class Dynamic extends Component{
         },
         visualMap: {
             show: false,
-            min: 0,
-            max: 1000,
+            min: humidityLow,
+            max: humidityHigh,
             color: ['#BE002F', '#F20C00', '#F00056', '#FF2D51', '#FF2121', '#FF4C00', '#FF7500',
                 '#FF8936', '#FFA400', '#F0C239', '#FFF143', '#FAFF72', '#C9DD22', '#AFDD22',
                 '#9ED900', '#00E500', '#0EB83A', '#0AA344', '#0C8918', '#057748', '#177CB0']
@@ -146,22 +149,22 @@ class Dynamic extends Component{
                 type: 'value',
                 scale: true,
                 name: 'temperature',
-                max: 50,
-                min: 0,
+                max: temperatureHigh,
+                min: temperatureLow,
                 boundaryGap: [0.2, 0.2]
             },
             {
                 type: 'value',
                 scale: true,
-                name: '预购量',
-                max: 1200,
-                min: 0,
+                name: 'humidity',
+                max:humidityHigh,
+                min: humidityLow,
                 boundaryGap: [0.2, 0.2]
             }
         ],
         series: [
             {
-                name:'预购队列',
+                name:'humidity',
                 type:'bar',
                 xAxisIndex: 1,
                 yAxisIndex: 1,
@@ -181,7 +184,7 @@ class Dynamic extends Component{
                     let res = [];
                     let len = 50;
                     while (len--) {
-                        res.push(Math.round(Math.random() * 1000));
+                        res.push(humidityLow);
                     }
                     return res;
                 })()
@@ -193,7 +196,7 @@ class Dynamic extends Component{
                     let res = [];
                     let len = 0;
                     while (len < 50) {
-                        res.push((Math.random()*10 + 5).toFixed(1) - 0);
+                        res.push(temperatureLow);
                         len++;
                     }
                     return res;
