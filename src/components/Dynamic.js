@@ -10,10 +10,17 @@ axios.defaults.baseURL = 'http://localhost:8080';
 //axios.defaults.headers.common['Authorization'] = 'AUTH_TOKEN';
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
+var state = {
+    open: 1,
+    close: 2
+}
+
 const humidityLow = 20;
 const humidityHigh = 70;
 const temperatureLow = -10;
 const temperatureHigh = 30;
+const humidityThreshold = 40;
+let lastMotorState = state.close;
 
 class Dynamic extends Component{
     constructor(props) {
@@ -32,7 +39,7 @@ class Dynamic extends Component{
                 console.log(response);
                 //var data = response.data;
                 var json = response.data;
-                _this.setState({curTemperature: json["temperature"], curHumidity: json["humidity"]});
+                _this.setState({curTemperature: parseFloat(json["temperature"]), curHumidity: parseFloat(json["humidity"])});
             })
             .catch(function (error) {
                 // handle error
@@ -43,8 +50,8 @@ class Dynamic extends Component{
             });
     }
 
-    controlMotor = () => {
-        axios.get('/controlMotor')
+    openMotor = () => {
+        axios.get('/openMotor')
             .then(function (response){
                 // handle success
                 console.log(response);
@@ -60,17 +67,49 @@ class Dynamic extends Component{
             });
     }
 
+    closeMotor = () => {
+        axios.get('/closeMotor')
+            .then(function (response){
+                // handle success
+                console.log(response);
+                //var data = response.data;
+                //var json = response.data;
+            })
+            .catch(function (error) {
+                // handle error
+                console.log(error);
+            })
+            .then(function () {
+                // always executed
+            });
+    }
+
+    controlMotor = (array) => {
+        let len = array.length;
+        let sum = 0;
+        for(let i = 0; i < len; ++i){
+            sum += array[i];
+        }
+        let res = sum / len;
+        if(res < humidityThreshold){
+            if(lastMotorState === state.close)
+                this.openMotor();
+        }else{
+            if(lastMotorState === state.open)
+                this.closeMotor();
+        }
+    }
+
     fetchNewDate = () => {
         let axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
         const option = cloneDeep(this.state.option); // immutable
         option.title.text = 'Hello Echarts-for-react.' + new Date().getSeconds();
         let data0 = option.series[0].data;
+        console.log(data0);
         let data1 = option.series[1].data;
 
         this.getTemperature();
-        if(this.state.curTemperature >= 20){
-            this.controlMotor();
-        }
+
         data0.shift();
         // 预购数量 (humidity)
         data0.push(this.state.curHumidity);
@@ -83,6 +122,8 @@ class Dynamic extends Component{
         option.xAxis[0].data.push(axisData);
         option.xAxis[1].data.shift();
         option.xAxis[1].data.push(this.count++);
+
+        this.controlMotor(data0);
 
         this.setState({
             option,
@@ -103,7 +144,7 @@ class Dynamic extends Component{
 
     getOption = () => ({
         title: {
-            text:'Hello Echarts-for-react.',
+            text:'Temperaeture and Humidity',
         },
         tooltip: {
             trigger: 'axis'
@@ -233,7 +274,7 @@ class Dynamic extends Component{
                 <Button variant="contained" color="primary" onClick={() => {alert('controlMotor'); this.controlMotor();}}>
                     ControlMotor
                 </Button>
-                <ReactEcharts ref='echartsInstance' option={this.state.option} style={{height: 600, width: 1000}}/>
+                <ReactEcharts ref='echartsInstance' option={this.state.option} style={{height: 600, width: 1000, left: 500}}/>
             </div>
         )
     }
