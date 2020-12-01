@@ -3,6 +3,7 @@ import ReactEcharts from 'echarts-for-react';
 import cloneDeep from 'lodash.clonedeep';
 
 import '../App.css'
+import Button from "@material-ui/core/Button";
 
 const axios = require('axios');
 axios.defaults.baseURL = 'http://localhost:8080';
@@ -42,19 +43,40 @@ class Dynamic extends Component{
             });
     }
 
+    controlMotor = () => {
+        axios.get('/controlMotor')
+            .then(function (response){
+                // handle success
+                console.log(response);
+                //var data = response.data;
+                //var json = response.data;
+            })
+            .catch(function (error) {
+                // handle error
+                console.log(error);
+            })
+            .then(function () {
+                // always executed
+            });
+    }
+
     fetchNewDate = () => {
         let axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
         const option = cloneDeep(this.state.option); // immutable
         option.title.text = 'Hello Echarts-for-react.' + new Date().getSeconds();
         let data0 = option.series[0].data;
         let data1 = option.series[1].data;
+
+        this.getTemperature();
+        if(this.state.curTemperature >= 20){
+            this.controlMotor();
+        }
         data0.shift();
         // 预购数量 (humidity)
         data0.push(this.state.curHumidity);
 
         data1.shift();
         // 价格（temperature）
-        this.getTemperature();
         data1.push(this.state.curTemperature);
 
         option.xAxis[0].data.shift();
@@ -208,6 +230,9 @@ class Dynamic extends Component{
     render() {
         return (
             <div className="chart">
+                <Button variant="contained" color="primary" onClick={() => {alert('controlMotor'); this.controlMotor();}}>
+                    ControlMotor
+                </Button>
                 <ReactEcharts ref='echartsInstance' option={this.state.option} style={{height: 600, width: 1000}}/>
             </div>
         )
