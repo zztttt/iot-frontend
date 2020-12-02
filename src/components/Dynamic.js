@@ -15,11 +15,11 @@ var state = {
     close: 2
 }
 
-const humidityLow = 20;
-const humidityHigh = 70;
-const temperatureLow = -10;
-const temperatureHigh = 30;
-const humidityThreshold = 40;
+const humidityLow = 35;
+const humidityHigh = 45;
+const temperatureLow = 27;
+const temperatureHigh = 29;
+const humidityThreshold = 50;
 let lastMotorState = state.close;
 
 class Dynamic extends Component{
@@ -103,9 +103,9 @@ class Dynamic extends Component{
     fetchNewDate = () => {
         let axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
         const option = cloneDeep(this.state.option); // immutable
-        option.title.text = 'Hello Echarts-for-react.' + new Date().getSeconds();
+        option.title.text = 'Temperaeture and Humidity.' + new Date().getSeconds();
         let data0 = option.series[0].data;
-        console.log(data0);
+        //console.log(data0);
         let data1 = option.series[1].data;
 
         this.getTemperature();
@@ -271,10 +271,10 @@ class Dynamic extends Component{
     render() {
         return (
             <div className="chart">
+                <ReactEcharts ref='echartsInstance' option={this.state.option} style={{height: 600, width: 1000}}/>
                 <Button variant="contained" color="primary" onClick={() => {alert('controlMotor'); this.controlMotor();}}>
                     ControlMotor
                 </Button>
-                <ReactEcharts ref='echartsInstance' option={this.state.option} style={{height: 600, width: 1000, left: 500}}/>
             </div>
         )
     }
