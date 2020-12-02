@@ -15,11 +15,11 @@ var state = {
     close: 2
 }
 
-const humidityLow = 35;
-const humidityHigh = 45;
-const temperatureLow = 27;
-const temperatureHigh = 29;
-const humidityThreshold = 50;
+const humidityLow = 30;
+const humidityHigh = 60;
+const temperatureLow = 20;
+const temperatureHigh = 35;
+const humidityThreshold = 45;
 let lastMotorState = state.close;
 
 class Dynamic extends Component{
@@ -87,16 +87,33 @@ class Dynamic extends Component{
     controlMotor = (array) => {
         let len = array.length;
         let sum = 0;
-        for(let i = 0; i < len; ++i){
+        for(let i = len - 10; i < len; ++i){
             sum += array[i];
         }
-        let res = sum / len;
+        let res = sum / 10;
         if(res < humidityThreshold){
-            if(lastMotorState === state.close)
+            if(lastMotorState === state.close) {
                 this.openMotor();
+                lastMotorState = state.open;
+                alert("open the humidifier");
+            }
         }else{
-            if(lastMotorState === state.open)
+            if(lastMotorState === state.open) {
                 this.closeMotor();
+                lastMotorState = state.close;
+                alert("close the humidifier");
+            }
+        }
+    }
+
+    control = () => {
+        if(lastMotorState === state.close) {
+            this.openMotor();
+            lastMotorState = state.open;
+        }
+        else {
+            this.closeMotor();
+            lastMotorState = state.close;
         }
     }
 
@@ -272,7 +289,7 @@ class Dynamic extends Component{
         return (
             <div className="chart">
                 <ReactEcharts ref='echartsInstance' option={this.state.option} style={{height: 600, width: 1000}}/>
-                <Button variant="contained" color="primary" onClick={() => {alert('controlMotor'); this.controlMotor();}}>
+                <Button variant="contained" color="primary" onClick={() => {alert('controlMotor'); this.control();}}>
                     ControlMotor
                 </Button>
             </div>
