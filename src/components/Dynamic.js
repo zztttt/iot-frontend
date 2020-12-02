@@ -140,7 +140,7 @@ class Dynamic extends Component{
         option.xAxis[1].data.shift();
         option.xAxis[1].data.push(this.count++);
 
-        this.controlMotor(data0);
+        //this.controlMotor(data0);
 
         this.setState({
             option,
